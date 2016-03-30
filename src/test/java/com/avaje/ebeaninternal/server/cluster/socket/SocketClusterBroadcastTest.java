@@ -24,12 +24,12 @@ public class SocketClusterBroadcastTest {
 
   SocketClusterBroadcastTest() throws InterruptedException {
 
-    ContainerConfig container0 = createContainerConfig("127.0.0.1:9876", "node0");
+    ContainerConfig container0 = createContainerConfig("127.0.0.1:9901", "node0");
     this.mgr0 = new ClusterManager(container0);
     TestServer server0 = new TestServer("s001");
     mgr0.registerServer(server0);
 
-    ContainerConfig container1 = createContainerConfig("127.0.0.1:9866", "node1");
+    ContainerConfig container1 = createContainerConfig("127.0.0.1:9902", "node1");
     this.mgr1 = new ClusterManager(container1);
     this.server1 = new TestServer("s001");
     mgr1.registerServer(server1);
@@ -44,7 +44,7 @@ public class SocketClusterBroadcastTest {
 
     Properties properties = new Properties();
     properties.setProperty("ebean.cluster.localHostPort", local);
-    properties.setProperty("ebean.cluster.members", "127.0.0.1:9876,127.0.0.1:9866");
+    properties.setProperty("ebean.cluster.members", "127.0.0.1:9901,127.0.0.1:9902");
     properties.setProperty("ebean.cluster.threadPoolName", threadPoolName);
 
     container0.setProperties(properties);

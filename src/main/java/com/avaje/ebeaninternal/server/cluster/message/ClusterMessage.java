@@ -1,14 +1,11 @@
-package com.avaje.ebeaninternal.server.cluster.socket;
-
-import com.avaje.ebeaninternal.server.cluster.DataHolder;
-import com.avaje.ebeaninternal.server.cluster.Packet;
+package com.avaje.ebeaninternal.server.cluster.message;
 
 import java.io.Serializable;
 
 /**
  * The messages broadcast around the cluster.
  */
-public class SocketClusterMessage implements Serializable {
+public class ClusterMessage implements Serializable {
 
   private static final long serialVersionUID = 2993350408394934473L;
 
@@ -18,29 +15,24 @@ public class SocketClusterMessage implements Serializable {
 
   private final DataHolder dataHolder;
 
-  public static SocketClusterMessage register(String registerHost, boolean register) {
-    return new SocketClusterMessage(registerHost, register);
+  public static ClusterMessage register(String registerHost, boolean register) {
+    return new ClusterMessage(registerHost, register);
   }
 
-  public static SocketClusterMessage transEvent(DataHolder transEvent) {
-    return new SocketClusterMessage(transEvent);
-  }
-
-  public static SocketClusterMessage packet(Packet packet) {
-    DataHolder d = new DataHolder(packet.getBytes());
-    return new SocketClusterMessage(d);
+  public static ClusterMessage transEvent(DataHolder transEvent) {
+    return new ClusterMessage(transEvent);
   }
 
   /**
    * Used to construct a Child AttributeMap.
    */
-  private SocketClusterMessage(String registerHost, boolean register) {
+  private ClusterMessage(String registerHost, boolean register) {
     this.registerHost = registerHost;
     this.register = register;
     this.dataHolder = null;
   }
 
-  private SocketClusterMessage(DataHolder dataHolder) {
+  private ClusterMessage(DataHolder dataHolder) {
     this.dataHolder = dataHolder;
     this.registerHost = null;
     this.register = false;

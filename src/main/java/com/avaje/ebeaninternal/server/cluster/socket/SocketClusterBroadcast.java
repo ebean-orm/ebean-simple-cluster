@@ -1,11 +1,11 @@
 package com.avaje.ebeaninternal.server.cluster.socket;
 
-import com.avaje.ebeaninternal.api.SpiEbeanServer;
 import com.avaje.ebeaninternal.server.cluster.ClusterBroadcast;
 import com.avaje.ebeaninternal.server.cluster.ClusterManager;
-import com.avaje.ebeaninternal.server.cluster.DataHolder;
-import com.avaje.ebeaninternal.server.cluster.SerialiseTransactionHelper;
+import com.avaje.ebeaninternal.server.cluster.message.DataHolder;
+import com.avaje.ebeaninternal.server.cluster.message.MessageReadWrite;
 import com.avaje.ebeaninternal.server.cluster.SocketConfig;
+import com.avaje.ebeaninternal.server.cluster.message.ClusterMessage;
 import com.avaje.ebeaninternal.server.transaction.RemoteTransactionEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +16,7 @@ import java.io.InterruptedIOException;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Broadcast messages across the cluster using sockets.
@@ -33,17 +33,15 @@ public class SocketClusterBroadcast implements ClusterBroadcast {
 
   private final SocketClient[] members;
 
-  private final ClusterManager clusterManager;
+  private final MessageReadWrite messageReadWrite;
 
-  private final TxnSerialiseHelper txnSerialiseHelper = new TxnSerialiseHelper();
+  private final AtomicLong countOutgoing = new AtomicLong();
 
-  private final AtomicInteger txnOutgoing = new AtomicInteger();
-
-  private final AtomicInteger txnIncoming = new AtomicInteger();
+  private final AtomicLong countIncoming = new AtomicLong();
 
   public SocketClusterBroadcast(ClusterManager manager, SocketConfig config) {
 
-    this.clusterManager = manager;
+    this.messageReadWrite = new MessageReadWrite(manager);
 
     String localHostPort = config.getLocalHostPort();
     List<String> members = config.getMembers();
@@ -65,7 +63,7 @@ public class SocketClusterBroadcast implements ClusterBroadcast {
     this.listener = new SocketClusterListener(this, local.getPort(), config.getCoreThreads(), config.getMaxThreads(), config.getThreadPoolName());
   }
 
-  public String getHostPort() {
+  String getHostPort() {
     return local.getHostPort();
   }
 
@@ -81,8 +79,8 @@ public class SocketClusterBroadcast implements ClusterBroadcast {
         ++currentGroupSize;
       }
     }
-    int txnIn = txnIncoming.get();
-    int txnOut = txnOutgoing.get();
+    long txnIn = countIncoming.get();
+    long txnOut = countOutgoing.get();
 
     return new SocketClusterStatus(currentGroupSize, txnIn, txnOut);
   }
@@ -102,18 +100,18 @@ public class SocketClusterBroadcast implements ClusterBroadcast {
    */
   private void register() {
 
-    SocketClusterMessage h = SocketClusterMessage.register(local.getHostPort(), true);
+    ClusterMessage h = ClusterMessage.register(local.getHostPort(), true);
 
     for (int i = 0; i < members.length; i++) {
       boolean online = members[i].register(h);
-      logger.info("Cluster Member [{}] online[{}]", members[i].getHostPort(), online);
+      logger.info("Register as online with Member [{}]", members[i].getHostPort(), online);
     }
   }
 
-  private void send(SocketClient client, SocketClusterMessage msg) {
+  private void send(SocketClient client, ClusterMessage msg) {
 
     try {
-      // alternative would be to connect/disconnect here but prefer to use keepalive
+      // alternative would be to connect/disconnect here but prefer to use keep alive
       if (logger.isTraceEnabled()) {
         logger.trace("... send to member {} broadcast msg: {}", client, msg);
       }
@@ -129,7 +127,7 @@ public class SocketClusterBroadcast implements ClusterBroadcast {
     }
   }
 
-  protected void setMemberOnline(String fullName, boolean online) throws IOException {
+  private void setMemberOnline(String fullName, boolean online) throws IOException {
     synchronized (clientMap) {
       logger.info("Cluster Member [{}] online[{}]", fullName, online);
       SocketClient member = clientMap.get(fullName);
@@ -142,16 +140,16 @@ public class SocketClusterBroadcast implements ClusterBroadcast {
    */
   public void broadcast(RemoteTransactionEvent remoteTransEvent) {
     try {
-      txnOutgoing.incrementAndGet();
-      DataHolder dataHolder = txnSerialiseHelper.createDataHolder(remoteTransEvent);
-      SocketClusterMessage msg = SocketClusterMessage.transEvent(dataHolder);
+      countOutgoing.incrementAndGet();
+      DataHolder dataHolder = messageReadWrite.createDataHolder(remoteTransEvent);
+      ClusterMessage msg = ClusterMessage.transEvent(dataHolder);
       broadcast(msg);
     } catch (Exception e) {
       logger.error("Error sending RemoteTransactionEvent " + remoteTransEvent + " to cluster members.", e);
     }
   }
 
-  protected void broadcast(SocketClusterMessage msg) {
+  private void broadcast(ClusterMessage msg) {
 
     if (logger.isTraceEnabled()) {
       logger.trace("... broadcast msg: {}", msg);
@@ -166,7 +164,7 @@ public class SocketClusterBroadcast implements ClusterBroadcast {
    */
   private void deregister() {
 
-    SocketClusterMessage h = SocketClusterMessage.register(local.getHostPort(), false);
+    ClusterMessage h = ClusterMessage.register(local.getHostPort(), false);
     broadcast(h);
     for (int i = 0; i < members.length; i++) {
       members[i].disconnect();
@@ -176,10 +174,10 @@ public class SocketClusterBroadcast implements ClusterBroadcast {
   /**
    * Process an incoming Cluster message.
    */
-  protected boolean process(SocketConnection request) throws ClassNotFoundException {
+  boolean process(SocketConnection request) throws ClassNotFoundException {
 
     try {
-      SocketClusterMessage h = (SocketClusterMessage) request.readObject();
+      ClusterMessage h = (ClusterMessage) request.readObject();
       if (logger.isTraceEnabled()) {
         logger.trace("... received msg: {}", h);
       }
@@ -188,9 +186,9 @@ public class SocketClusterBroadcast implements ClusterBroadcast {
         setMemberOnline(h.getRegisterHost(), h.isRegister());
 
       } else {
-        txnIncoming.incrementAndGet();
+        countIncoming.incrementAndGet();
         DataHolder dataHolder = h.getDataHolder();
-        RemoteTransactionEvent transEvent = txnSerialiseHelper.read(dataHolder);
+        RemoteTransactionEvent transEvent = messageReadWrite.read(dataHolder);
         transEvent.run();
       }
 
@@ -238,11 +236,4 @@ public class SocketClusterBroadcast implements ClusterBroadcast {
     }
   }
 
-  class TxnSerialiseHelper extends SerialiseTransactionHelper {
-
-    @Override
-    public SpiEbeanServer getEbeanServer(String serverName) {
-      return (SpiEbeanServer) clusterManager.getServer(serverName);
-    }
-  }
 }

@@ -3,6 +3,7 @@ package com.avaje.ebeaninternal.server.cluster.socket;
 
 import com.avaje.ebean.AccessEbeanServerFactory;
 import com.avaje.ebean.EbeanServer;
+import com.avaje.ebean.SqlUpdate;
 import com.avaje.ebean.common.SpiContainer;
 import com.avaje.ebean.config.ContainerConfig;
 import com.avaje.ebean.config.ServerConfig;
@@ -25,6 +26,7 @@ public class IntegrationTest {
   private final SpiContainer container0;
   private final SpiContainer container1;
   private EbeanServer server0;
+  private EbeanServer server1;
 
   private Customer customer;
 
@@ -39,7 +41,7 @@ public class IntegrationTest {
 
     ContainerConfig containerConfig1 = createContainerConfig("127.0.0.1:9866", "node1");
     this.container1 = AccessEbeanServerFactory.createContainer(containerConfig1);
-    container1.createServer(createServerConfig("db0", server1Listener));
+    this.server1 = container1.createServer(createServerConfig("db0", server1Listener));
 
     sleep();
   }
@@ -72,10 +74,15 @@ public class IntegrationTest {
   @Test
   public void insert() throws Exception {
 
+    server1.getServerCacheManager().getBeanCache(Customer.class);
+    server1.getServerCacheManager().getNaturalKeyCache(Customer.class);
+    server1.getServerCacheManager().getQueryCache(Customer.class);
+
     customer = new Customer("customer");
     server0.save(customer);
 
     sleep();
+    server1.find(Customer.class).setUseCache(true).setId(customer.getId());
 
     assertSame(server0Listener.localInserted, customer);
     assertEquals(server1Listener.remoteInsertId, customer.getId());
@@ -102,8 +109,55 @@ public class IntegrationTest {
     assertEquals(server1Listener.remoteDeleteId, customer.getId());
   }
 
+  @Test(dependsOnMethods = "delete")
+  public void deleteById() throws InterruptedException {
+
+    Customer other = new Customer("shortLived");
+    server0.save(other);
+
+    server0.delete(Customer.class, other.getId());
+    sleep();
+
+    //assertEquals(server1Listener.remoteDeleteId, other.getId());
+  }
+
+  @Test(dependsOnMethods = "deleteById")
+  public void tableIUD() throws InterruptedException {
+
+    server0.externalModification("customer", true, true, true);
+    sleep();
+  }
+
+  @Test(dependsOnMethods = "tableIUD")
+  public void bulkInsert() throws InterruptedException {
+
+    SqlUpdate sqlInsert = server0.createSqlUpdate("insert into customer (id, name, version) values(900, :name, 1)");
+    sqlInsert.setParameter("name", "bulkTest");
+    sqlInsert.execute();
+
+    sleep();
+  }
+
+  @Test(dependsOnMethods = "bulkInsert")
+  public void bulkUpdate() throws InterruptedException {
+
+    SqlUpdate sqlUpdate = server0.createSqlUpdate("update customer set notes = 'foo' where notes is null");
+    sqlUpdate.execute();
+
+    sleep();
+  }
+
+  @Test(dependsOnMethods = "bulkUpdate")
+  public void bulkDelete() throws InterruptedException {
+
+    SqlUpdate sqlDelete = server0.createSqlUpdate("delete from customer where id > 100");
+    sqlDelete.execute();
+
+    sleep();
+  }
+
   private void sleep() throws InterruptedException {
-    Thread.sleep(1000);
+    Thread.sleep(50);
   }
 
   @AfterClass

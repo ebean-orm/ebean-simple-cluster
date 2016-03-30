@@ -6,8 +6,6 @@ import java.util.Properties;
 
 /**
  * Configuration for clustering using TCP sockets.
- * <p>
- * This is good for when there are relatively small number of cluster members.
  */
 public class SocketConfig {
 

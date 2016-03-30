@@ -1,4 +1,4 @@
-package com.avaje.ebeaninternal.server.cluster;
+package com.avaje.ebeaninternal.server.cluster.message;
 
 import java.io.Serializable;
 

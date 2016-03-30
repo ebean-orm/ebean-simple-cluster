@@ -1,5 +1,6 @@
 package com.avaje.ebeaninternal.server.cluster.socket;
 
+import com.avaje.ebeaninternal.server.cluster.message.ClusterMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,13 +25,15 @@ class SocketClient {
   private boolean online;
 
   private Socket socket;
+
   private OutputStream os;
+
   private ObjectOutputStream oos;
 
   /**
    * Construct with an IP address and port.
    */
-  public SocketClient(InetSocketAddress address) {
+  SocketClient(InetSocketAddress address) {
     this.address = address;
     this.hostPort = address.getHostName() + ":" + address.getPort();
   }
@@ -39,19 +42,19 @@ class SocketClient {
     return address.toString();
   }
 
-  public String getHostPort() {
+  String getHostPort() {
     return hostPort;
   }
 
-  public int getPort() {
+  int getPort() {
     return address.getPort();
   }
 
-  public boolean isOnline() {
+  boolean isOnline() {
     return online;
   }
 
-  public void setOnline(boolean online) throws IOException {
+  void setOnline(boolean online) throws IOException {
     if (online) {
       setOnline();
     } else {
@@ -59,6 +62,51 @@ class SocketClient {
     }
   }
 
+  void reconnect() throws IOException {
+    disconnect();
+    connect();
+  }
+
+
+  void disconnect() {
+    this.online = false;
+    if (socket != null) {
+      try {
+        socket.close();
+      } catch (IOException e) {
+        String msg = "Error disconnecting from Cluster member " + hostPort;
+        logger.info(msg, e);
+      }
+      os = null;
+      oos = null;
+      socket = null;
+    }
+  }
+
+  boolean register(ClusterMessage registerMsg) {
+    try {
+      setOnline();
+      send(registerMsg);
+      return true;
+    } catch (IOException e) {
+      disconnect();
+      return false;
+    }
+  }
+
+  void send(ClusterMessage msg) throws IOException {
+    if (online) {
+      writeObject(msg);
+    }
+  }
+
+  private void writeObject(ClusterMessage msg) throws IOException {
+    if (oos == null) {
+      this.oos = new ObjectOutputStream(os);
+    }
+    oos.writeObject(msg);
+    oos.flush();
+  }
 
   /**
    * Set whether the client is thought to be online.
@@ -66,11 +114,6 @@ class SocketClient {
   private void setOnline() throws IOException {
     connect();
     this.online = true;
-  }
-
-  public void reconnect() throws IOException {
-    disconnect();
-    connect();
   }
 
   private void connect() throws IOException {
@@ -83,50 +126,6 @@ class SocketClient {
 
     this.socket = s;
     this.os = socket.getOutputStream();
-  }
-
-  public void disconnect() {
-    this.online = false;
-    if (socket != null) {
-
-      try {
-        socket.close();
-      } catch (IOException e) {
-        String msg = "Error disconnecting from Cluster member " + hostPort;
-        logger.info(msg, e);
-      }
-
-      os = null;
-      oos = null;
-      socket = null;
-    }
-  }
-
-  public boolean register(SocketClusterMessage registerMsg) {
-
-    try {
-      setOnline();
-      send(registerMsg);
-      return true;
-    } catch (IOException e) {
-      disconnect();
-      return false;
-    }
-  }
-
-  public void send(SocketClusterMessage msg) throws IOException {
-
-    if (online) {
-      writeObject(msg);
-    }
-  }
-
-  private void writeObject(Object object) throws IOException {
-    if (oos == null) {
-      this.oos = new ObjectOutputStream(os);
-    }
-    oos.writeObject(object);
-    oos.flush();
   }
 
 }
