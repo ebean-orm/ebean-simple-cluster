@@ -2,10 +2,9 @@ package com.avaje.ebeaninternal.server.cluster.socket;
 
 import com.avaje.ebeaninternal.server.cluster.ClusterBroadcast;
 import com.avaje.ebeaninternal.server.cluster.ClusterManager;
-import com.avaje.ebeaninternal.server.cluster.message.DataHolder;
-import com.avaje.ebeaninternal.server.cluster.message.MessageReadWrite;
 import com.avaje.ebeaninternal.server.cluster.SocketConfig;
 import com.avaje.ebeaninternal.server.cluster.message.ClusterMessage;
+import com.avaje.ebeaninternal.server.cluster.message.MessageReadWrite;
 import com.avaje.ebeaninternal.server.transaction.RemoteTransactionEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,8 +140,8 @@ public class SocketClusterBroadcast implements ClusterBroadcast {
   public void broadcast(RemoteTransactionEvent remoteTransEvent) {
     try {
       countOutgoing.incrementAndGet();
-      DataHolder dataHolder = messageReadWrite.createDataHolder(remoteTransEvent);
-      ClusterMessage msg = ClusterMessage.transEvent(dataHolder);
+      byte[] data = messageReadWrite.write(remoteTransEvent);
+      ClusterMessage msg = ClusterMessage.transEvent(data);
       broadcast(msg);
     } catch (Exception e) {
       logger.error("Error sending RemoteTransactionEvent " + remoteTransEvent + " to cluster members.", e);
@@ -177,23 +176,22 @@ public class SocketClusterBroadcast implements ClusterBroadcast {
   boolean process(SocketConnection request) throws ClassNotFoundException {
 
     try {
-      ClusterMessage h = (ClusterMessage) request.readObject();
+      ClusterMessage message = ClusterMessage.read(request.getDataInputStream());
       if (logger.isTraceEnabled()) {
-        logger.trace("... received msg: {}", h);
+        logger.trace("... received msg: {}", message);
       }
 
-      if (h.isRegisterEvent()) {
-        setMemberOnline(h.getRegisterHost(), h.isRegister());
+      if (message.isRegisterEvent()) {
+        setMemberOnline(message.getRegisterHost(), message.isRegister());
 
       } else {
         countIncoming.incrementAndGet();
-        DataHolder dataHolder = h.getDataHolder();
-        RemoteTransactionEvent transEvent = messageReadWrite.read(dataHolder);
+        RemoteTransactionEvent transEvent = messageReadWrite.read(message.getData());
         transEvent.run();
       }
 
       // instance shutting down
-      return h.isRegisterEvent() && !h.isRegister();
+      return message.isRegisterEvent() && !message.isRegister();
 
     } catch (InterruptedIOException e) {
       logger.info("Timeout waiting for message", e);

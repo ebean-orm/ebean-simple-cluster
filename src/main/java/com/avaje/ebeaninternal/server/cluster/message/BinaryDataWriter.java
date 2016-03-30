@@ -27,7 +27,7 @@ public class BinaryDataWriter {
     this.dataOut = new DataOutputStream(buffer);
   }
 
-  public DataHolder createDataHolder() throws IOException {
+  public byte[] write() throws IOException {
 
     dataOut.writeUTF(serverName);
     for (BinaryMessage msg : messageList.getList()) {
@@ -35,7 +35,7 @@ public class BinaryDataWriter {
     }
     dataOut.writeBoolean(false);
     dataOut.flush();
-    return new DataHolder(buffer.toByteArray());
+    return buffer.toByteArray();
   }
 
   private void write(BinaryMessage msg) throws IOException {

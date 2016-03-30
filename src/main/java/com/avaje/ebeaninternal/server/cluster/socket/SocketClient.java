@@ -4,8 +4,8 @@ import com.avaje.ebeaninternal.server.cluster.message.ClusterMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -28,7 +28,7 @@ class SocketClient {
 
   private OutputStream os;
 
-  private ObjectOutputStream oos;
+  private DataOutputStream dataOutput;
 
   /**
    * Construct with an IP address and port.
@@ -78,7 +78,7 @@ class SocketClient {
         logger.info(msg, e);
       }
       os = null;
-      oos = null;
+      dataOutput = null;
       socket = null;
     }
   }
@@ -96,16 +96,8 @@ class SocketClient {
 
   void send(ClusterMessage msg) throws IOException {
     if (online) {
-      writeObject(msg);
+      msg.write(dataOutput);
     }
-  }
-
-  private void writeObject(ClusterMessage msg) throws IOException {
-    if (oos == null) {
-      this.oos = new ObjectOutputStream(os);
-    }
-    oos.writeObject(msg);
-    oos.flush();
   }
 
   /**
@@ -126,6 +118,7 @@ class SocketClient {
 
     this.socket = s;
     this.os = socket.getOutputStream();
+    this.dataOutput = new DataOutputStream(os);
   }
 
 }

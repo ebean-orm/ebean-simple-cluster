@@ -1,8 +1,8 @@
 package com.avaje.ebeaninternal.server.cluster.socket;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
@@ -14,7 +14,7 @@ class SocketConnection {
   /**
    * The underlying ObjectInputStream.
    */
-  private ObjectInputStream ois;
+  private DataInputStream ois;
 
   /**
    * The underlying inputStream.
@@ -49,25 +49,11 @@ class SocketConnection {
   }
 
   /**
-   * Flush the outputStream.
+   * Get the DataInputStream to read the message.
    */
-  public void flush() throws IOException {
-    os.flush();
-  }
-
-  /**
-   * Read an object from the object input stream.
-   */
-  Object readObject() throws IOException, ClassNotFoundException {
-    return getObjectInputStream().readObject();
-  }
-
-  /**
-   * Get the object input stream.
-   */
-  ObjectInputStream getObjectInputStream() throws IOException {
+  DataInputStream getDataInputStream() throws IOException {
     if (ois == null) {
-      ois = new ObjectInputStream(is);
+      ois = new DataInputStream(is);
     }
     return ois;
   }

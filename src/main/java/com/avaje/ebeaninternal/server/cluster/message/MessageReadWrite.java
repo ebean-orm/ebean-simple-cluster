@@ -3,8 +3,6 @@ package com.avaje.ebeaninternal.server.cluster.message;
 import com.avaje.ebeaninternal.server.cluster.BinaryMessageList;
 import com.avaje.ebeaninternal.server.cluster.ClusterManager;
 import com.avaje.ebeaninternal.server.transaction.RemoteTransactionEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -22,22 +20,21 @@ public class MessageReadWrite {
   /**
    * Convert the RemoteTransactionEvent to byte[] content.
    */
-  public DataHolder createDataHolder(RemoteTransactionEvent transEvent) throws IOException {
+  public byte[] write(RemoteTransactionEvent transEvent) throws IOException {
 
     BinaryMessageList messageList = new BinaryMessageList();
     transEvent.writeBinaryMessage(messageList);
 
     BinaryDataWriter writer = new BinaryDataWriter(transEvent.getServerName(), messageList);
-    return writer.createDataHolder();
+    return writer.write();
   }
 
   /**
    * Convert the byte[] content to RemoteTransactionEvent.
    */
-  public RemoteTransactionEvent read(DataHolder dataHolder) throws IOException {
+  public RemoteTransactionEvent read(byte[] data) throws IOException {
 
-    BinaryDataReader reader = new BinaryDataReader(clusterManager, dataHolder.getData());
-
+    BinaryDataReader reader = new BinaryDataReader(clusterManager, data);
     return reader.read();
   }
 }
