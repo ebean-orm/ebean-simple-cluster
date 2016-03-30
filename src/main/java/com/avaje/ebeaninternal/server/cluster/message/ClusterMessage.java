@@ -60,16 +60,32 @@ public class ClusterMessage {
     return sb.toString();
   }
 
+  /**
+   * Return true if this is a register event as opposed to a transaction message.
+   */
   public boolean isRegisterEvent() {
     return registerHost != null;
   }
 
+  /**
+   * Return the register host for online/offline message.
+   */
   public String getRegisterHost() {
     return registerHost;
   }
 
+  /**
+   * Return true if register is true for a online/offline message.
+   */
   public boolean isRegister() {
     return register;
+  }
+
+  /**
+   * Return the raw message data.
+   */
+  public byte[] getData() {
+    return data;
   }
 
   /**
@@ -109,7 +125,4 @@ public class ClusterMessage {
     }
   }
 
-  public byte[] getData() {
-    return data;
-  }
 }

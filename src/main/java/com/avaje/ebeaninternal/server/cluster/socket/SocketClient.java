@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 /**
@@ -22,6 +23,11 @@ class SocketClient {
 
   private final String hostPort;
 
+  /**
+   * lock guarding all access
+   */
+  private final ReentrantLock lock;
+
   private boolean online;
 
   private Socket socket;
@@ -34,6 +40,7 @@ class SocketClient {
    * Construct with an IP address and port.
    */
   SocketClient(InetSocketAddress address) {
+    this.lock = new ReentrantLock(false);
     this.address = address;
     this.hostPort = address.getHostName() + ":" + address.getPort();
   }
@@ -55,48 +62,78 @@ class SocketClient {
   }
 
   void setOnline(boolean online) throws IOException {
-    if (online) {
-      setOnline();
-    } else {
-      disconnect();
+    final ReentrantLock lock = this.lock;
+    lock.lock();
+    try {
+      if (online) {
+        setOnline();
+      } else {
+        disconnect();
+      }
+    } finally {
+      lock.unlock();
     }
   }
 
   void reconnect() throws IOException {
-    disconnect();
-    connect();
+    final ReentrantLock lock = this.lock;
+    lock.lock();
+    try {
+      disconnect();
+      connect();
+    } finally {
+      lock.unlock();
+    }
   }
 
 
   void disconnect() {
-    this.online = false;
-    if (socket != null) {
-      try {
-        socket.close();
-      } catch (IOException e) {
-        String msg = "Error disconnecting from Cluster member " + hostPort;
-        logger.info(msg, e);
+    final ReentrantLock lock = this.lock;
+    lock.lock();
+    try {
+      this.online = false;
+      if (socket != null) {
+        try {
+          socket.close();
+        } catch (IOException e) {
+          String msg = "Error disconnecting from Cluster member " + hostPort;
+          logger.info(msg, e);
+        }
+        os = null;
+        dataOutput = null;
+        socket = null;
       }
-      os = null;
-      dataOutput = null;
-      socket = null;
+    } finally {
+      lock.unlock();
     }
   }
 
   boolean register(ClusterMessage registerMsg) {
+    final ReentrantLock lock = this.lock;
+    lock.lock();
     try {
-      setOnline();
-      send(registerMsg);
-      return true;
-    } catch (IOException e) {
-      disconnect();
-      return false;
+      try {
+        setOnline();
+        send(registerMsg);
+        return true;
+      } catch (IOException e) {
+        disconnect();
+        return false;
+      }
+    } finally {
+      lock.unlock();
     }
   }
 
   void send(ClusterMessage msg) throws IOException {
-    if (online) {
-      msg.write(dataOutput);
+    final ReentrantLock lock = this.lock;
+    lock.lock();
+    try {
+      if (online) {
+        msg.write(dataOutput);
+      }
+    } finally {
+      lock.unlock();
     }
   }
 

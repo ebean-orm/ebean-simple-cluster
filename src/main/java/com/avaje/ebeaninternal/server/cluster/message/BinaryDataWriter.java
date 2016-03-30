@@ -10,7 +10,7 @@ import java.io.IOException;
 /**
  * Writes BinaryMessageList to DataHolder raw byte[].
  */
-public class BinaryDataWriter {
+class BinaryDataWriter {
 
   private final BinaryMessageList messageList;
 
@@ -20,14 +20,17 @@ public class BinaryDataWriter {
 
   private final String serverName;
 
-  public BinaryDataWriter(String serverName, BinaryMessageList messageList) {
+  BinaryDataWriter(String serverName, BinaryMessageList messageList) {
     this.serverName = serverName;
     this.messageList = messageList;
     this.buffer = new ByteArrayOutputStream(256);
     this.dataOut = new DataOutputStream(buffer);
   }
 
-  public byte[] write() throws IOException {
+  /**
+   * Write the message as raw byte[].
+   */
+  byte[] write() throws IOException {
 
     dataOut.writeUTF(serverName);
     for (BinaryMessage msg : messageList.getList()) {

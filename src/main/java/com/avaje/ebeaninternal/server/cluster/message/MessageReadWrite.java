@@ -18,7 +18,7 @@ public class MessageReadWrite {
   }
 
   /**
-   * Convert the RemoteTransactionEvent to byte[] content.
+   * Convert the RemoteTransactionEvent to raw byte[] content.
    */
   public byte[] write(RemoteTransactionEvent transEvent) throws IOException {
 

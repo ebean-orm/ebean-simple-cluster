@@ -14,7 +14,7 @@ import java.io.IOException;
 /**
  * Reads the binary message returning RemoteTransactionEvent.
  */
-public class BinaryDataReader {
+class BinaryDataReader {
 
   private final ClusterManager clusterManager;
   private final DataInputStream dataInput;
@@ -22,12 +22,15 @@ public class BinaryDataReader {
   private SpiEbeanServer server;
   private RemoteTransactionEvent event;
 
-  public BinaryDataReader(ClusterManager clusterManager, byte[] data) {
+  BinaryDataReader(ClusterManager clusterManager, byte[] data) {
     this.clusterManager = clusterManager;
     this.dataInput = new DataInputStream(new ByteArrayInputStream(data));
   }
 
-  public RemoteTransactionEvent read() throws IOException {
+  /**
+   * Read the binary message returning a RemoteTransactionEvent.
+   */
+  RemoteTransactionEvent read() throws IOException {
 
     String serverName = dataInput.readUTF();
 
@@ -36,7 +39,6 @@ public class BinaryDataReader {
       throw new IllegalStateException("EbeanServer not found for name ["+serverName+"]");
     }
     this.event = new RemoteTransactionEvent(server);
-
     boolean more = dataInput.readBoolean();
     while (more) {
       readMessage();
