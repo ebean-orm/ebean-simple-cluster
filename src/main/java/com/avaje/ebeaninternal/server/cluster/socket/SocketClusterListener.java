@@ -124,7 +124,7 @@ class SocketClusterListener implements Runnable {
         }
       } catch (SocketException e) {
         if (doingShutdown) {
-          logger.info("doingShutdown and accept threw:" + e.getMessage());
+          logger.debug("doingShutdown and accept threw:" + e.getMessage());
         } else {
           logger.error("Error while listening", e);
         }

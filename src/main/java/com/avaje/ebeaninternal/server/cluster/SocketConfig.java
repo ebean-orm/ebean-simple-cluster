@@ -125,7 +125,12 @@ public class SocketConfig {
     return Integer.parseInt(getProperty(key, Integer.toString(value)));
   }
 
-  private String getProperty(String key, String localHostPort) {
-    return properties.getProperty(key, localHostPort).trim();
+  private String getProperty(String key, String defaultValue) {
+    String value = properties.getProperty(key.toLowerCase());
+    if (value != null) {
+      return value.trim();
+    }
+    value = properties.getProperty(key, defaultValue);
+    return (value == null) ? null : value.trim();
   }
 }

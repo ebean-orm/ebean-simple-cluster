@@ -22,6 +22,8 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class SocketClusterBroadcast implements ClusterBroadcast {
 
+  private static final Logger clusterLogger = LoggerFactory.getLogger("org.avaje.ebean.Cluster");
+
   private static final Logger logger = LoggerFactory.getLogger(SocketClusterBroadcast.class);
 
   private final SocketClient local;
@@ -44,7 +46,7 @@ public class SocketClusterBroadcast implements ClusterBroadcast {
 
     String localHostPort = config.getLocalHostPort();
     List<String> members = config.getMembers();
-    logger.info("Clustering using Sockets local[{}] members[{}]",localHostPort, members);
+    clusterLogger.info("Clustering using local[{}] members[{}]",localHostPort, members);
 
     this.local = new SocketClient(parseFullName(localHostPort));
     this.clientMap = new HashMap<String, SocketClient>();
@@ -98,12 +100,10 @@ public class SocketClusterBroadcast implements ClusterBroadcast {
    * Register with all the other members of the Cluster.
    */
   private void register() {
-
     ClusterMessage h = ClusterMessage.register(local.getHostPort(), true);
-
     for (int i = 0; i < members.length; i++) {
       boolean online = members[i].register(h);
-      logger.info("Register as online with Member [{}]", members[i].getHostPort(), online);
+      clusterLogger.info("Register as online with member [{}]", members[i].getHostPort(), online);
     }
   }
 
@@ -128,7 +128,7 @@ public class SocketClusterBroadcast implements ClusterBroadcast {
 
   private void setMemberOnline(String fullName, boolean online) throws IOException {
     synchronized (clientMap) {
-      logger.info("Cluster Member [{}] online[{}]", fullName, online);
+      clusterLogger.info("Cluster member [{}] online[{}]", fullName, online);
       SocketClient member = clientMap.get(fullName);
       member.setOnline(online);
     }
@@ -149,10 +149,6 @@ public class SocketClusterBroadcast implements ClusterBroadcast {
   }
 
   private void broadcast(ClusterMessage msg) {
-
-    if (logger.isTraceEnabled()) {
-      logger.trace("... broadcast msg: {}", msg);
-    }
     for (int i = 0; i < members.length; i++) {
       send(members[i], msg);
     }
@@ -162,7 +158,7 @@ public class SocketClusterBroadcast implements ClusterBroadcast {
    * Leave the cluster.
    */
   private void deregister() {
-
+    clusterLogger.info("Leaving cluster");
     ClusterMessage h = ClusterMessage.register(local.getHostPort(), false);
     broadcast(h);
     for (int i = 0; i < members.length; i++) {
@@ -203,7 +199,7 @@ public class SocketClusterBroadcast implements ClusterBroadcast {
       return true;
 
     } catch (EOFException e) {
-      logger.info("EOF disconnecting");
+      logger.debug("EOF disconnecting");
       return true;
     } catch (IOException e) {
       logger.info("IO Error waiting/reading message", e);
