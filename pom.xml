@@ -15,10 +15,7 @@
   <version>1.1.1-SNAPSHOT</version>
 
   <scm>
-    <connection>scm:git:https://github.com/ebean-orm/avaje-ebeanorm-cluster.git</connection>
     <developerConnection>scm:git:https://github.com/ebean-orm/avaje-ebeanorm-cluster.git</developerConnection>
-    <url>https://github.com/ebean-orm/avaje-ebeanorm-cluster.git</url>
-    <tag>HEAD</tag>
   </scm>
 
   <properties>
