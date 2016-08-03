@@ -61,7 +61,7 @@ public class SocketClusterBroadcast implements ClusterBroadcast {
     }
 
     this.members = clientMap.values().toArray(new SocketClient[clientMap.size()]);
-    this.listener = new SocketClusterListener(this, local.getPort(), config.getCoreThreads(), config.getMaxThreads(), config.getThreadPoolName());
+    this.listener = new SocketClusterListener(this, local.getPort(), config.getThreadPoolName());
   }
 
   String getHostPort() {

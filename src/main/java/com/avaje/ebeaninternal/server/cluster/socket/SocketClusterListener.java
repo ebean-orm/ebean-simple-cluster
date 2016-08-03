@@ -1,6 +1,6 @@
 package com.avaje.ebeaninternal.server.cluster.socket;
 
-import com.avaje.ebeaninternal.server.lib.DaemonThreadPool;
+import com.avaje.ebeaninternal.server.lib.DaemonThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,6 +9,8 @@ import java.io.InterruptedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 /**
@@ -41,7 +43,7 @@ class SocketClusterListener implements Runnable {
   /**
    * The pool of threads that actually do the parsing execution of requests.
    */
-  private final DaemonThreadPool threadPool;
+  private final ExecutorService service;
 
   private final SocketClusterBroadcast owner;
 
@@ -58,9 +60,9 @@ class SocketClusterListener implements Runnable {
   /**
    * Construct with a given thread pool name.
    */
-  public SocketClusterListener(SocketClusterBroadcast owner, int port, int coreThreads, int maxThreads, String poolName) {
+  public SocketClusterListener(SocketClusterBroadcast owner, int port, String poolName) {
     this.owner = owner;
-    this.threadPool = new DaemonThreadPool(coreThreads, maxThreads, 60, 30, poolName);
+    this.service = Executors.newCachedThreadPool(new DaemonThreadFactory(poolName));
     try {
       this.serverListenSocket = new ServerSocket(port);
       this.serverListenSocket.setSoTimeout(60000);
@@ -102,7 +104,7 @@ class SocketClusterListener implements Runnable {
       logger.error("Error shutting down listener", e);
     }
 
-    threadPool.shutdown();
+    service.shutdown();
   }
 
   /**
@@ -118,7 +120,7 @@ class SocketClusterListener implements Runnable {
           isActive = true;
 
           Runnable request = new RequestProcessor(owner, clientSocket);
-          threadPool.execute(request);
+          service.execute(request);
 
           isActive = false;
         }

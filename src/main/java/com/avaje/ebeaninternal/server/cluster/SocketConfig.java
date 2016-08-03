@@ -19,16 +19,6 @@ public class SocketConfig {
    */
   private List<String> members = new ArrayList<String>();
 
-  /**
-   * core threads for the associated thread pool.
-   */
-  private int coreThreads = 2;
-
-  /**
-   * Max threads for the associated thread pool.
-   */
-  private int maxThreads = 16;
-
   private String threadPoolName = "EbeanCluster";
 
   private Properties properties;
@@ -62,34 +52,6 @@ public class SocketConfig {
   }
 
   /**
-   * Return the number of core threads to use.
-   */
-  public int getCoreThreads() {
-    return coreThreads;
-  }
-
-  /**
-   * Set the number of core threads to use.
-   */
-  public void setCoreThreads(int coreThreads) {
-    this.coreThreads = coreThreads;
-  }
-
-  /**
-   * Return the number of max threads to use.
-   */
-  public int getMaxThreads() {
-    return maxThreads;
-  }
-
-  /**
-   * Set the number of max threads to use.
-   */
-  public void setMaxThreads(int maxThreads) {
-    this.maxThreads = maxThreads;
-  }
-
-  /**
    * Return the thread pool name.
    */
   public String getThreadPoolName() {
@@ -111,18 +73,12 @@ public class SocketConfig {
     this.properties = properties;
     this.threadPoolName = getProperty("ebean.cluster.threadPoolName", threadPoolName);
     this.localHostPort = getProperty("ebean.cluster.localHostPort", localHostPort);
-    this.coreThreads = getInt("ebean.cluster.coreThreads", coreThreads);
-    this.maxThreads = getInt("ebean.cluster.maxThreads", maxThreads);
 
     String rawMembers = getProperty("ebean.cluster.members", "");
     String[] split = rawMembers.split("[,;]");
     for (String rawMember : split) {
       members.add(rawMember.trim());
     }
-  }
-
-  private int getInt(String key, int value) {
-    return Integer.parseInt(getProperty(key, Integer.toString(value)));
   }
 
   private String getProperty(String key, String defaultValue) {
