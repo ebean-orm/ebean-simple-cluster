@@ -1,14 +1,12 @@
 package org.example.domain;
 
-import com.avaje.ebean.annotation.CacheStrategy;
-import com.avaje.ebean.annotation.CacheTuning;
+import com.avaje.ebean.annotation.Cache;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Version;
 
-@CacheTuning
-@CacheStrategy
+@Cache
 @Entity
 public class Customer {
 

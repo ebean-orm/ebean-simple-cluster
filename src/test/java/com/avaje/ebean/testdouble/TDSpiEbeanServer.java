@@ -1,19 +1,23 @@
 package com.avaje.ebean.testdouble;
 
-import com.avaje.ebean.*;
+import com.avaje.ebean.AutoTune;
+import com.avaje.ebean.BeanState;
+import com.avaje.ebean.ExpressionFactory;
+import com.avaje.ebean.PersistenceContextScope;
+import com.avaje.ebean.Query;
+import com.avaje.ebean.TDEbeanServer;
+import com.avaje.ebean.Transaction;
+import com.avaje.ebean.TxScope;
+import com.avaje.ebean.ValuePair;
 import com.avaje.ebean.bean.BeanCollection;
 import com.avaje.ebean.bean.CallStack;
 import com.avaje.ebean.bean.EntityBeanIntercept;
 import com.avaje.ebean.bean.ObjectGraphNode;
-import com.avaje.ebean.cache.ServerCacheManager;
 import com.avaje.ebean.config.ServerConfig;
 import com.avaje.ebean.config.dbplatform.DatabasePlatform;
 import com.avaje.ebean.event.readaudit.ReadAuditLogger;
 import com.avaje.ebean.event.readaudit.ReadAuditPrepare;
 import com.avaje.ebean.meta.MetaInfoManager;
-import com.avaje.ebean.plugin.SpiServer;
-import com.avaje.ebean.text.csv.CsvReader;
-import com.avaje.ebean.text.json.JsonContext;
 import com.avaje.ebeaninternal.api.LoadBeanRequest;
 import com.avaje.ebeaninternal.api.LoadManyRequest;
 import com.avaje.ebeaninternal.api.ScopeTrans;
@@ -21,27 +25,23 @@ import com.avaje.ebeaninternal.api.SpiEbeanServer;
 import com.avaje.ebeaninternal.api.SpiQuery;
 import com.avaje.ebeaninternal.api.SpiTransaction;
 import com.avaje.ebeaninternal.api.TransactionEventTable;
+import com.avaje.ebeaninternal.server.core.timezone.DataTimeZone;
 import com.avaje.ebeaninternal.server.deploy.BeanDescriptor;
 import com.avaje.ebeaninternal.server.query.CQuery;
 import com.avaje.ebeaninternal.server.transaction.RemoteTransactionEvent;
 
-import javax.persistence.OptimisticLockException;
-import javax.persistence.PersistenceException;
 import java.lang.reflect.Type;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 
 /**
  * Test double for SpiEbeanServer.
  */
-public class TDSpiEbeanServer implements SpiEbeanServer {
+public class TDSpiEbeanServer extends TDEbeanServer implements SpiEbeanServer {
 
   String name;
-  public TDSpiEbeanServer() {
-  }
+
   public TDSpiEbeanServer(String name) {
     this.name = name;
   }
@@ -49,11 +49,6 @@ public class TDSpiEbeanServer implements SpiEbeanServer {
   @Override
   public void shutdownManaged() {
 
-  }
-
-  @Override
-  public SpiServer getPluginApi() {
-    return null;
   }
 
   @Override
@@ -87,7 +82,7 @@ public class TDSpiEbeanServer implements SpiEbeanServer {
   }
 
   @Override
-  public DocumentStore docStore() {
+  public DataTimeZone getDataTimeZone() {
     return null;
   }
 
@@ -100,6 +95,7 @@ public class TDSpiEbeanServer implements SpiEbeanServer {
   public ReadAuditPrepare getReadAuditPrepare() {
     return null;
   }
+
 
   @Override
   public void clearQueryStatistics() {
@@ -163,16 +159,6 @@ public class TDSpiEbeanServer implements SpiEbeanServer {
 
   @Override
   public <T> CQuery<T> compileQuery(Query<T> query, Transaction t) {
-    return null;
-  }
-
-  @Override
-  public <T> int delete(Query<T> query, Transaction t) {
-    return 0;
-  }
-
-  @Override
-  public <T> List<Version<T>> findVersions(Query<T> query, Transaction transaction) {
     return null;
   }
 
@@ -266,533 +252,4 @@ public class TDSpiEbeanServer implements SpiEbeanServer {
     return null;
   }
 
-  @Override
-  public <T> CsvReader<T> createCsvReader(Class<T> beanType) {
-    return null;
-  }
-
-  @Override
-  public <T> Query<T> createNamedQuery(Class<T> beanType, String namedQuery) {
-    return null;
-  }
-
-  @Override
-  public <T> Query<T> createQuery(Class<T> beanType, String query) {
-    return null;
-  }
-
-  @Override
-  public <T> Query<T> createQuery(Class<T> beanType) {
-    return null;
-  }
-
-  @Override
-  public <T> Query<T> find(Class<T> beanType) {
-    return null;
-  }
-
-  @Override
-  public <T> Set<String> validateQuery(Query<T> query) {
-    return null;
-  }
-
-  @Override
-  public Object nextId(Class<?> beanType) {
-    return null;
-  }
-
-  @Override
-  public <T> Filter<T> filter(Class<T> beanType) {
-    return null;
-  }
-
-  @Override
-  public <T> void sort(List<T> list, String sortByClause) {
-
-  }
-
-  @Override
-  public <T> Update<T> createNamedUpdate(Class<T> beanType, String namedUpdate) {
-    return null;
-  }
-
-  @Override
-  public <T> Update<T> createUpdate(Class<T> beanType, String ormUpdate) {
-    return null;
-  }
-
-  @Override
-  public SqlQuery createSqlQuery(String sql) {
-    return null;
-  }
-
-  @Override
-  public SqlQuery createNamedSqlQuery(String namedQuery) {
-    return null;
-  }
-
-  @Override
-  public SqlUpdate createSqlUpdate(String sql) {
-    return null;
-  }
-
-  @Override
-  public CallableSql createCallableSql(String callableSql) {
-    return null;
-  }
-
-  @Override
-  public SqlUpdate createNamedSqlUpdate(String namedQuery) {
-    return null;
-  }
-
-  @Override
-  public void register(TransactionCallback transactionCallback) throws PersistenceException {
-
-  }
-
-  @Override
-  public <T> T publish(Class<T> beanType, Object id) {
-    return null;
-  }
-
-  @Override
-  public <T> List<T> publish(Query<T> query) {
-    return null;
-  }
-
-  @Override
-  public <T> T publish(Class<T> beanType, Object id, Transaction transaction) {
-    return null;
-  }
-
-  @Override
-  public <T> List<T> publish(Query<T> query, Transaction transaction) {
-    return null;
-  }
-
-  @Override
-  public <T> T draftRestore(Class<T> beanType, Object id, Transaction transaction) {
-    return null;
-  }
-
-  @Override
-  public <T> List<T> draftRestore(Query<T> query, Transaction transaction) {
-    return null;
-  }
-
-  @Override
-  public <T> T draftRestore(Class<T> beanType, Object id) {
-    return null;
-  }
-
-  @Override
-  public <T> List<T> draftRestore(Query<T> query) {
-    return null;
-  }
-
-  @Override
-  public Transaction createTransaction() {
-    return null;
-  }
-
-  @Override
-  public Transaction createTransaction(TxIsolation isolation) {
-    return null;
-  }
-
-  @Override
-  public Transaction beginTransaction() {
-    return null;
-  }
-
-  @Override
-  public Transaction beginTransaction(TxScope scope) {
-    return null;
-  }
-
-  @Override
-  public Transaction beginTransaction(TxIsolation isolation) {
-    return null;
-  }
-
-  @Override
-  public Transaction currentTransaction() {
-    return null;
-  }
-
-  @Override
-  public void commitTransaction() {
-
-  }
-
-  @Override
-  public void rollbackTransaction() {
-
-  }
-
-  @Override
-  public void endTransaction() {
-
-  }
-
-  @Override
-  public void refresh(Object bean) {
-
-  }
-
-  @Override
-  public void refreshMany(Object bean, String propertyName) {
-
-  }
-
-  @Override
-  public <T> T find(Class<T> beanType, Object uid) {
-    return null;
-  }
-
-  @Override
-  public <T> T getReference(Class<T> beanType, Object id) {
-    return null;
-  }
-
-  @Override
-  public <T> int findRowCount(Query<T> query, Transaction transaction) {
-    return 0;
-  }
-
-  @Override
-  public <T> List<Object> findIds(Query<T> query, Transaction transaction) {
-    return null;
-  }
-
-  @Override
-  public <T> QueryIterator<T> findIterate(Query<T> query, Transaction transaction) {
-    return null;
-  }
-
-  @Override
-  public <T> void findEach(Query<T> query, QueryEachConsumer<T> consumer, Transaction transaction) {
-
-  }
-
-  @Override
-  public <T> void findEachWhile(Query<T> query, QueryEachWhileConsumer<T> consumer, Transaction transaction) {
-
-  }
-
-  @Override
-  public <T> List<T> findList(Query<T> query, Transaction transaction) {
-    return null;
-  }
-
-  @Override
-  public <T> FutureRowCount<T> findFutureRowCount(Query<T> query, Transaction transaction) {
-    return null;
-  }
-
-  @Override
-  public <T> FutureIds<T> findFutureIds(Query<T> query, Transaction transaction) {
-    return null;
-  }
-
-  @Override
-  public <T> FutureList<T> findFutureList(Query<T> query, Transaction transaction) {
-    return null;
-  }
-
-  @Override
-  public SqlFutureList findFutureList(SqlQuery query, Transaction transaction) {
-    return null;
-  }
-
-  @Override
-  public <T> PagedList<T> findPagedList(Query<T> query, Transaction transaction, int pageIndex, int pageSize) {
-    return null;
-  }
-
-  @Override
-  public <T> PagedList<T> findPagedList(Query<T> query, Transaction transaction) {
-    return null;
-  }
-
-  @Override
-  public <T> Set<T> findSet(Query<T> query, Transaction transaction) {
-    return null;
-  }
-
-  @Override
-  public <T> Map<?, T> findMap(Query<T> query, Transaction transaction) {
-    return null;
-  }
-
-  @Override
-  public <T> T findUnique(Query<T> query, Transaction transaction) {
-    return null;
-  }
-
-  @Override
-  public List<SqlRow> findList(SqlQuery query, Transaction transaction) {
-    return null;
-  }
-
-  @Override
-  public Set<SqlRow> findSet(SqlQuery query, Transaction transaction) {
-    return null;
-  }
-
-  @Override
-  public Map<?, SqlRow> findMap(SqlQuery query, Transaction transaction) {
-    return null;
-  }
-
-  @Override
-  public SqlRow findUnique(SqlQuery query, Transaction transaction) {
-    return null;
-  }
-
-  @Override
-  public void save(Object bean) throws OptimisticLockException {
-
-  }
-
-  @Override
-  public boolean delete(Object bean) throws OptimisticLockException {
-    return false;
-  }
-
-  @Override
-  public int delete(Class<?> beanType, Object id) {
-    return 0;
-  }
-
-  @Override
-  public int delete(Class<?> beanType, Object id, Transaction transaction) {
-    return 0;
-  }
-
-  @Override
-  public int execute(SqlUpdate updSql) {
-    return 0;
-  }
-
-  @Override
-  public int execute(Update<?> update) {
-    return 0;
-  }
-
-  @Override
-  public int execute(Update<?> update, Transaction t) {
-    return 0;
-  }
-
-  @Override
-  public int execute(CallableSql callableSql) {
-    return 0;
-  }
-
-  @Override
-  public void externalModification(String tableName, boolean inserted, boolean updated, boolean deleted) {
-
-  }
-
-  @Override
-  public <T> T find(Class<T> beanType, Object uid, Transaction transaction) {
-    return null;
-  }
-
-  @Override
-  public void save(Object bean, Transaction transaction) throws OptimisticLockException {
-
-  }
-
-  @Override
-  public void markAsDirty(Object bean) {
-
-  }
-
-  @Override
-  public void update(Object bean) throws OptimisticLockException {
-
-  }
-
-  @Override
-  public void update(Object bean, Transaction t) throws OptimisticLockException {
-
-  }
-
-  @Override
-  public void update(Object bean, Transaction transaction, boolean deleteMissingChildren) throws OptimisticLockException {
-
-  }
-
-  @Override
-  public void insert(Object bean) {
-
-  }
-
-  @Override
-  public void insert(Object bean, Transaction t) {
-
-  }
-
-  @Override
-  public int deleteManyToManyAssociations(Object ownerBean, String propertyName) {
-    return 0;
-  }
-
-  @Override
-  public int deleteManyToManyAssociations(Object ownerBean, String propertyName, Transaction t) {
-    return 0;
-  }
-
-  @Override
-  public void saveManyToManyAssociations(Object ownerBean, String propertyName) {
-
-  }
-
-  @Override
-  public void saveManyToManyAssociations(Object ownerBean, String propertyName, Transaction t) {
-
-  }
-
-  @Override
-  public void saveAssociation(Object ownerBean, String propertyName) {
-
-  }
-
-  @Override
-  public void saveAssociation(Object ownerBean, String propertyName, Transaction t) {
-
-  }
-
-  @Override
-  public boolean delete(Object bean, Transaction t) throws OptimisticLockException {
-    return false;
-  }
-
-  @Override
-  public boolean deletePermanent(Object bean) throws OptimisticLockException {
-    return false;
-  }
-
-  @Override
-  public boolean deletePermanent(Object bean, Transaction transaction) throws OptimisticLockException {
-    return false;
-  }
-
-  @Override
-  public int deleteAllPermanent(Collection<?> beans) throws OptimisticLockException {
-    return 0;
-  }
-
-  @Override
-  public int deleteAllPermanent(Collection<?> beans, Transaction transaction) throws OptimisticLockException {
-    return 0;
-  }
-
-  @Override
-  public int execute(SqlUpdate updSql, Transaction t) {
-    return 0;
-  }
-
-  @Override
-  public int execute(CallableSql callableSql, Transaction t) {
-    return 0;
-  }
-
-  @Override
-  public void execute(TxScope scope, TxRunnable r) {
-
-  }
-
-  @Override
-  public void execute(TxRunnable r) {
-
-  }
-
-  @Override
-  public <T> T execute(TxScope scope, TxCallable<T> c) {
-    return null;
-  }
-
-  @Override
-  public <T> T execute(TxCallable<T> c) {
-    return null;
-  }
-
-  @Override
-  public ServerCacheManager getServerCacheManager() {
-    return null;
-  }
-
-  @Override
-  public BackgroundExecutor getBackgroundExecutor() {
-    return null;
-  }
-
-  @Override
-  public void runCacheWarming() {
-
-  }
-
-  @Override
-  public void runCacheWarming(Class<?> beanType) {
-
-  }
-
-  @Override
-  public JsonContext json() {
-    return null;
-  }
-
-  @Override
-  public int saveAll(Collection<?> beans) throws OptimisticLockException {
-    return 0;
-  }
-
-  @Override
-  public int deleteAll(Collection<?> beans) throws OptimisticLockException {
-    return 0;
-  }
-
-  @Override
-  public int deleteAll(Collection<?> beans, Transaction transaction) throws OptimisticLockException {
-    return 0;
-  }
-
-  @Override
-  public void deleteAll(Class<?> beanType, Collection<?> ids) {
-
-  }
-
-  @Override
-  public void deleteAll(Class<?> beanType, Collection<?> ids, Transaction transaction) {
-
-  }
-
-  @Override
-  public int saveAll(Collection<?> beans, Transaction transaction) throws OptimisticLockException {
-    return 0;
-  }
-
-  @Override
-  public void updateAll(Collection<?> beans) throws OptimisticLockException {
-
-  }
-
-  @Override
-  public void updateAll(Collection<?> beans, Transaction transaction) throws OptimisticLockException {
-
-  }
-
-  @Override
-  public void insertAll(Collection<?> beans) {
-
-  }
-
-  @Override
-  public void insertAll(Collection<?> beans, Transaction transaction) {
-
-  }
 }

@@ -16,7 +16,6 @@ import org.testng.annotations.Test;
 import java.util.Properties;
 import java.util.Set;
 
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
 
 public class IntegrationTest {
@@ -54,7 +53,7 @@ public class IntegrationTest {
     serverConfig.add(listener);
     serverConfig.setRegister(false);
     serverConfig.setDefaultServer(false);
-    return  serverConfig;
+    return serverConfig;
   }
 
 
@@ -85,7 +84,6 @@ public class IntegrationTest {
     server1.find(Customer.class).setUseCache(true).setId(customer.getId());
 
     assertSame(server0Listener.localInserted, customer);
-    assertEquals(server1Listener.remoteInsertId, customer.getId());
   }
 
   @Test(dependsOnMethods = "insert")
@@ -96,7 +94,6 @@ public class IntegrationTest {
     sleep();
 
     assertSame(server0Listener.localUpdated, customer);
-    assertEquals(server1Listener.remoteUpdateId, customer.getId());
   }
 
   @Test(dependsOnMethods = "update")
@@ -106,7 +103,6 @@ public class IntegrationTest {
     sleep();
 
     assertSame(server0Listener.localDeleted, customer);
-    assertEquals(server1Listener.remoteDeleteId, customer.getId());
   }
 
   @Test(dependsOnMethods = "delete")
@@ -116,9 +112,6 @@ public class IntegrationTest {
     server0.save(other);
 
     server0.delete(Customer.class, other.getId());
-    sleep();
-
-    //assertEquals(server1Listener.remoteDeleteId, other.getId());
   }
 
   @Test(dependsOnMethods = "deleteById")
@@ -168,10 +161,6 @@ public class IntegrationTest {
 
   class BeanListener extends AbstractBeanPersistListener {
 
-    Object remoteInsertId;
-    Object remoteUpdateId;
-    Object remoteDeleteId;
-
     Object localInserted;
     Object localUpdated;
     Object localDeleted;
@@ -182,36 +171,18 @@ public class IntegrationTest {
     }
 
     @Override
-    public void remoteInsert(Object id) {
-      this.remoteInsertId = id;
-    }
-
-    @Override
-    public void remoteUpdate(Object id) {
-      this.remoteUpdateId = id;
-    }
-
-    @Override
-    public void remoteDelete(Object id) {
-      this.remoteDeleteId = id;
-    }
-
-    @Override
-    public boolean inserted(Object bean) {
+    public void inserted(Object bean) {
       this.localInserted = bean;
-      return true;
     }
 
     @Override
-    public boolean updated(Object bean, Set<String> updatedProperties) {
+    public void updated(Object bean, Set<String> updatedProperties) {
       this.localUpdated = bean;
-      return true;
     }
 
     @Override
-    public boolean deleted(Object bean) {
+    public void deleted(Object bean) {
       this.localDeleted = bean;
-      return true;
     }
   }
 
