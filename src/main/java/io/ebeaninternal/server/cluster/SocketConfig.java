@@ -17,7 +17,7 @@ public class SocketConfig {
   /**
    * All the cluster members in host:port format.
    */
-  private List<String> members = new ArrayList<String>();
+  private List<String> members = new ArrayList<>();
 
   private String threadPoolName = "EbeanCluster";
 

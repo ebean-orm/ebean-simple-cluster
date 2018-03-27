@@ -40,7 +40,7 @@ public class SocketClusterBroadcastTest {
   private ContainerConfig createContainerConfig(String local, String threadPoolName) {
 
     ContainerConfig container0 = new ContainerConfig();
-    container0.setClusterActive(true);
+    container0.setActive(true);
 
     Properties properties = new Properties();
     properties.setProperty("ebean.cluster.localHostPort", local);

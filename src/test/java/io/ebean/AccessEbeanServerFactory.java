@@ -1,6 +1,6 @@
 package io.ebean;
 
-import io.ebean.common.SpiContainer;
+import io.ebean.service.SpiContainer;
 import io.ebean.config.ContainerConfig;
 
 /**
