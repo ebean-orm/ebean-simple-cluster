@@ -4,6 +4,7 @@ package io.ebeaninternal.server.cluster.socket;
 import io.ebean.AccessEbeanServerFactory;
 import io.ebean.EbeanServer;
 import io.ebean.SqlUpdate;
+import io.ebean.Transaction;
 import io.ebean.service.SpiContainer;
 import io.ebean.config.ContainerConfig;
 import io.ebean.config.ServerConfig;
@@ -105,13 +106,22 @@ public class IntegrationTest {
     assertSame(server0Listener.localDeleted, customer);
   }
 
-  @Test(dependsOnMethods = "delete")
-  public void deleteById() throws InterruptedException {
+  @Test
+  public void deleteById() {
 
     Customer other = new Customer("shortLived");
     server0.save(other);
+    Customer other2 = new Customer("shortLived");
+    server0.save(other2);
+    Customer other3 = new Customer("shortLived");
+    server0.save(other3);
 
-    server0.delete(Customer.class, other.getId());
+    try (Transaction transaction = server0.beginTransaction()) {
+      server0.delete(Customer.class, other.getId());
+      server0.delete(Customer.class, other2.getId());
+      server0.delete(other3);
+      transaction.commit();
+    }
   }
 
   @Test(dependsOnMethods = "deleteById")

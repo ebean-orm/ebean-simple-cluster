@@ -1,10 +1,10 @@
 package io.ebeaninternal.server.cluster.socket;
 
+import io.ebeaninternal.server.cluster.BinaryTransactionEventReader;
 import io.ebeaninternal.server.cluster.ClusterBroadcast;
 import io.ebeaninternal.server.cluster.ClusterManager;
 import io.ebeaninternal.server.cluster.SocketConfig;
 import io.ebeaninternal.server.cluster.message.ClusterMessage;
-import io.ebeaninternal.server.cluster.message.MessageReadWrite;
 import io.ebeaninternal.server.transaction.RemoteTransactionEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,7 @@ public class SocketClusterBroadcast implements ClusterBroadcast {
 
   private final SocketClient[] members;
 
-  private final MessageReadWrite messageReadWrite;
+  private final BinaryTransactionEventReader transactionEventReader;
 
   private final AtomicLong countOutgoing = new AtomicLong();
 
@@ -42,7 +42,7 @@ public class SocketClusterBroadcast implements ClusterBroadcast {
 
   public SocketClusterBroadcast(ClusterManager manager, SocketConfig config) {
 
-    this.messageReadWrite = new MessageReadWrite(manager);
+    this.transactionEventReader = new BinaryTransactionEventReader(manager);
 
     String localHostPort = config.getLocalHostPort();
     List<String> members = config.getMembers();
@@ -140,7 +140,7 @@ public class SocketClusterBroadcast implements ClusterBroadcast {
   public void broadcast(RemoteTransactionEvent remoteTransEvent) {
     try {
       countOutgoing.incrementAndGet();
-      byte[] data = messageReadWrite.write(remoteTransEvent);
+      byte[] data = remoteTransEvent.writeBinaryAsBytes(256);
       ClusterMessage msg = ClusterMessage.transEvent(data);
       broadcast(msg);
     } catch (Exception e) {
@@ -182,7 +182,7 @@ public class SocketClusterBroadcast implements ClusterBroadcast {
 
       } else {
         countIncoming.incrementAndGet();
-        RemoteTransactionEvent transEvent = messageReadWrite.read(message.getData());
+        RemoteTransactionEvent transEvent = transactionEventReader.read(message.getData());
         transEvent.run();
       }
 

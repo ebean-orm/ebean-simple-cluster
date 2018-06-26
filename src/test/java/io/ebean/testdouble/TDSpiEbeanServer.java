@@ -4,8 +4,11 @@ import io.ebean.AutoTune;
 import io.ebean.BeanState;
 import io.ebean.DtoQuery;
 import io.ebean.ExpressionFactory;
+import io.ebean.ExtendedServer;
 import io.ebean.PersistenceContextScope;
 import io.ebean.Query;
+import io.ebean.RowConsumer;
+import io.ebean.RowMapper;
 import io.ebean.TDEbeanServer;
 import io.ebean.Transaction;
 import io.ebean.TxScope;
@@ -25,7 +28,10 @@ import io.ebeaninternal.api.LoadManyRequest;
 import io.ebeaninternal.api.SpiDtoQuery;
 import io.ebeaninternal.api.SpiEbeanServer;
 import io.ebeaninternal.api.SpiJsonContext;
+import io.ebeaninternal.api.SpiLogManager;
 import io.ebeaninternal.api.SpiQuery;
+import io.ebeaninternal.api.SpiSqlQuery;
+import io.ebeaninternal.api.SpiSqlUpdate;
 import io.ebeaninternal.api.SpiTransaction;
 import io.ebeaninternal.api.SpiTransactionManager;
 import io.ebeaninternal.api.TransactionEventTable;
@@ -37,6 +43,7 @@ import io.ebeaninternal.server.query.CQuery;
 import io.ebeaninternal.server.transaction.RemoteTransactionEvent;
 
 import java.lang.reflect.Type;
+import java.time.Clock;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -192,6 +199,62 @@ public class TDSpiEbeanServer extends TDEbeanServer implements SpiEbeanServer {
 
   @Override
   public void scopedTransactionExit(Object returnOrThrowable, int opCode) {
+
+
+  }
+
+  @Override
+  public SpiLogManager log() {
+    return null;
+  }
+
+  @Override
+  public <T> T findSingleAttribute(SpiSqlQuery spiSqlQuery, Class<T> aClass) {
+    return null;
+  }
+
+  @Override
+  public <T> List<T> findSingleAttributeList(SpiSqlQuery spiSqlQuery, Class<T> aClass) {
+    return null;
+  }
+
+  @Override
+  public <T> T findOneMapper(SpiSqlQuery spiSqlQuery, RowMapper<T> rowMapper) {
+    return null;
+  }
+
+  @Override
+  public <T> List<T> findListMapper(SpiSqlQuery spiSqlQuery, RowMapper<T> rowMapper) {
+    return null;
+  }
+
+  @Override
+  public void findEachRow(SpiSqlQuery spiSqlQuery, RowConsumer rowConsumer) {
+
+  }
+
+  @Override
+  public void addBatch(SpiSqlUpdate spiSqlUpdate, SpiTransaction spiTransaction) {
+
+  }
+
+  @Override
+  public int[] executeBatch(SpiSqlUpdate spiSqlUpdate, SpiTransaction spiTransaction) {
+    return new int[0];
+  }
+
+  @Override
+  public ExtendedServer extended() {
+    return null;
+  }
+
+  @Override
+  public long clockNow() {
+    return 0;
+  }
+
+  @Override
+  public void setClock(Clock clock) {
 
   }
 
