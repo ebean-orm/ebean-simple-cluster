@@ -103,7 +103,7 @@ public class SocketClusterBroadcast implements ClusterBroadcast {
     ClusterMessage h = ClusterMessage.register(local.getHostPort(), true);
     for (int i = 0; i < members.length; i++) {
       boolean online = members[i].register(h);
-      clusterLogger.info("Register as online with member [{}]", members[i].getHostPort(), online);
+      clusterLogger.info("Register as online with member [{}], connected: [{}]", members[i].getHostPort(), online);
     }
   }
 
