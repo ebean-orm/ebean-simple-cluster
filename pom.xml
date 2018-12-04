@@ -10,11 +10,11 @@
 
   <groupId>io.ebean</groupId>
   <artifactId>ebean-cluster</artifactId>
-  <version>11.18.2</version>
+  <version>11.18.3-SNAPSHOT</version>
 
   <scm>
     <developerConnection>scm:git:git@github.com:ebean-orm/ebean-cluster.git</developerConnection>
-    <tag>ebean-cluster-11.18.2</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <dependencies>
