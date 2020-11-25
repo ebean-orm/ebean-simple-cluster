@@ -9,7 +9,7 @@
   </parent>
 
   <groupId>io.ebean</groupId>
-  <artifactId>ebean-cluster</artifactId>
+  <artifactId>ebean-simple-cluster</artifactId>
   <version>12.6.0-SNAPSHOT</version>
 
   <scm>
