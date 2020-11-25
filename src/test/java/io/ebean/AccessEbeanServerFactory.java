@@ -9,8 +9,7 @@ import io.ebean.config.ContainerConfig;
 public class AccessEbeanServerFactory {
 
   public static SpiContainer createContainer(ContainerConfig config) {
-
-    return EbeanServerFactory.createContainer(config);
+    return DatabaseFactory.createContainer(config);
   }
 
 }

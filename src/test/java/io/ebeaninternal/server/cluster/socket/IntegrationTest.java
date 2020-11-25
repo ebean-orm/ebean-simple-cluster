@@ -2,14 +2,14 @@ package io.ebeaninternal.server.cluster.socket;
 
 
 import io.ebean.AccessEbeanServerFactory;
-import io.ebean.EbeanServer;
+import io.ebean.Database;
 import io.ebean.SqlUpdate;
 import io.ebean.Transaction;
-import io.ebean.service.SpiContainer;
 import io.ebean.config.ContainerConfig;
-import io.ebean.config.ServerConfig;
+import io.ebean.config.DatabaseConfig;
 import io.ebean.event.AbstractBeanPersistListener;
 import io.ebean.event.BeanPersistListener;
+import io.ebean.service.SpiContainer;
 import org.example.domain.Customer;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
@@ -25,8 +25,8 @@ public class IntegrationTest {
   private final BeanListener server1Listener;
   private final SpiContainer container0;
   private final SpiContainer container1;
-  private EbeanServer server0;
-  private EbeanServer server1;
+  private Database server0;
+  private Database server1;
 
   private Customer customer;
 
@@ -46,8 +46,8 @@ public class IntegrationTest {
     sleep();
   }
 
-  private ServerConfig createServerConfig(String name, BeanPersistListener listener) {
-    ServerConfig serverConfig = new ServerConfig();
+  private DatabaseConfig createServerConfig(String name, BeanPersistListener listener) {
+    DatabaseConfig serverConfig = new DatabaseConfig();
     serverConfig.setName(name);
     serverConfig.loadFromProperties();
     serverConfig.setName("db");
@@ -134,7 +134,7 @@ public class IntegrationTest {
   @Test(dependsOnMethods = "tableIUD")
   public void bulkInsert() throws InterruptedException {
 
-    SqlUpdate sqlInsert = server0.createSqlUpdate("insert into customer (id, name, version) values(900, :name, 1)");
+    SqlUpdate sqlInsert = server0.sqlUpdate("insert into customer (id, name, version) values(900, :name, 1)");
     sqlInsert.setParameter("name", "bulkTest");
     sqlInsert.execute();
 
@@ -144,7 +144,7 @@ public class IntegrationTest {
   @Test(dependsOnMethods = "bulkInsert")
   public void bulkUpdate() throws InterruptedException {
 
-    SqlUpdate sqlUpdate = server0.createSqlUpdate("update customer set notes = 'foo' where notes is null");
+    SqlUpdate sqlUpdate = server0.sqlUpdate("update customer set notes = 'foo' where notes is null");
     sqlUpdate.execute();
 
     sleep();
@@ -153,7 +153,7 @@ public class IntegrationTest {
   @Test(dependsOnMethods = "bulkUpdate")
   public void bulkDelete() throws InterruptedException {
 
-    SqlUpdate sqlDelete = server0.createSqlUpdate("delete from customer where id > 100");
+    SqlUpdate sqlDelete = server0.sqlUpdate("delete from customer where id > 100");
     sqlDelete.execute();
 
     sleep();
