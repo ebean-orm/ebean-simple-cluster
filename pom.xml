@@ -10,7 +10,7 @@
 
   <groupId>io.ebean</groupId>
   <artifactId>ebean-simple-cluster</artifactId>
-  <version>12.6.0-SNAPSHOT</version>
+  <version>12.6.1-SNAPSHOT</version>
 
   <scm>
     <developerConnection>scm:git:git@github.com:ebean-orm/ebean-cluster.git</developerConnection>
@@ -22,7 +22,7 @@
     <dependency>
       <groupId>io.ebean</groupId>
       <artifactId>ebean</artifactId>
-      <version>12.6.0</version>
+      <version>12.6.1</version>
       <scope>provided</scope>
     </dependency>
 
