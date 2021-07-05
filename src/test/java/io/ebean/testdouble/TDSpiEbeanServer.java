@@ -256,6 +256,15 @@ public class TDSpiEbeanServer extends TDDatabase implements SpiEbeanServer {
   }
 
   @Override
+  public <T> void findSingleAttributeEach(
+          SpiSqlQuery spiSqlQuery,
+          Class<T> aClass,
+          Consumer<T> consumer
+  ) {
+
+  }
+
+  @Override
   public <T> T findOneMapper(SpiSqlQuery query, RowMapper<T> mapper) {
     return null;
   }
@@ -271,6 +280,16 @@ public class TDSpiEbeanServer extends TDDatabase implements SpiEbeanServer {
   }
 
   @Override
+  public <T> QueryIterator<T> findDtoIterate(SpiDtoQuery<T> spiDtoQuery) {
+    return null;
+  }
+
+  @Override
+  public <T> Stream<T> findDtoStream(SpiDtoQuery<T> spiDtoQuery) {
+    return null;
+  }
+
+  @Override
   public <T> List<T> findDtoList(SpiDtoQuery<T> query) {
     return null;
   }
@@ -282,6 +301,15 @@ public class TDSpiEbeanServer extends TDDatabase implements SpiEbeanServer {
 
   @Override
   public <T> void findDtoEach(SpiDtoQuery<T> query, Consumer<T> consumer) {
+
+  }
+
+  @Override
+  public <T> void findDtoEach(
+          SpiDtoQuery<T> spiDtoQuery,
+          int i,
+          Consumer<List<T>> consumer
+  ) {
 
   }
 
@@ -372,6 +400,16 @@ public class TDSpiEbeanServer extends TDDatabase implements SpiEbeanServer {
 
   @Override
   public <T> void findEach(Query<T> query, Consumer<T> consumer, Transaction transaction) {
+
+  }
+
+  @Override
+  public <T> void findEach(
+          Query<T> query,
+          int i,
+          Consumer<List<T>> consumer,
+          Transaction transaction
+  ) {
 
   }
 
