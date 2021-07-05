@@ -7,23 +7,21 @@ import io.ebeaninternal.server.cluster.ClusterManager;
 import io.ebeaninternal.server.transaction.RemoteTableMod;
 import io.ebeaninternal.server.transaction.RemoteTransactionEvent;
 import io.ebean.testdouble.TDSpiEbeanServer;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class SocketClusterBroadcastTest {
+class SocketClusterBroadcastTest {
 
-  private ClusterManager mgr0;
-  private ClusterManager mgr1;
-  private TestServer server1;
+  private final ClusterManager mgr0;
+  private final ClusterManager mgr1;
+  private final TestServer server1;
 
   SocketClusterBroadcastTest() throws InterruptedException {
 
@@ -55,7 +53,12 @@ public class SocketClusterBroadcastTest {
   }
 
   @Test
-  public void broadcast() throws Exception {
+  void runAllTests() throws Exception {
+    broadcast();
+    broadcast_RemoteTableMod();
+  }
+
+  void broadcast() throws Exception {
 
     RemoteTransactionEvent evt = new RemoteTransactionEvent("s001");
     TransactionEventTable.TableIUD tableIUD = new TransactionEventTable.TableIUD("noSuchTable", true, false, false);
@@ -72,9 +75,9 @@ public class SocketClusterBroadcastTest {
 
     TransactionEventTable.TableIUD remoteTableIUD = server1.event.getTableIUDList().get(0);
     assertEquals(remoteTableIUD.getTableName(), "noSuchTable");
-    assertEquals(remoteTableIUD.isInsert(), true);
-    assertEquals(remoteTableIUD.isUpdate(), false);
-    assertEquals(remoteTableIUD.isDelete(), false);
+    assertTrue(remoteTableIUD.isInsert());
+    assertFalse(remoteTableIUD.isUpdate());
+    assertFalse(remoteTableIUD.isDelete());
   }
 
   @Test
@@ -101,13 +104,13 @@ public class SocketClusterBroadcastTest {
     assertThat(tables1).contains("noSuchTable2");
   }
 
-  @AfterClass
-  public void shutdown() {
+  @AfterEach
+  void shutdown() {
     mgr0.shutdown();
     mgr1.shutdown();
   }
 
-  private class TestServer extends TDSpiEbeanServer {
+  private static class TestServer extends TDSpiEbeanServer {
 
     RemoteTransactionEvent event;
 

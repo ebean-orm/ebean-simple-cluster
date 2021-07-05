@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.avaje</groupId>
     <artifactId>java8-oss</artifactId>
-    <version>2.3</version>
+    <version>3.1</version>
   </parent>
 
   <groupId>io.ebean</groupId>
   <artifactId>ebean-simple-cluster</artifactId>
-  <version>12.9.3-SNAPSHOT</version>
+  <version>12.9.0-SNAPSHOT</version>
 
   <scm>
     <developerConnection>scm:git:git@github.com:ebean-orm/ebean-simple-cluster.git</developerConnection>
@@ -34,9 +34,16 @@
     </dependency>
 
     <dependency>
+      <groupId>io.ebean</groupId>
+      <artifactId>ebean-test</artifactId>
+      <version>12.9.2</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.avaje.composite</groupId>
-      <artifactId>composite-testing</artifactId>
-      <version>3.1</version>
+      <artifactId>junit</artifactId>
+      <version>5.1</version>
       <scope>test</scope>
     </dependency>
 
@@ -63,7 +70,7 @@
       <plugin>
         <groupId>io.repaint.maven</groupId>
         <artifactId>tiles-maven-plugin</artifactId>
-        <version>2.18</version>
+        <version>2.22</version>
         <extensions>true</extensions>
         <configuration>
           <tiles>

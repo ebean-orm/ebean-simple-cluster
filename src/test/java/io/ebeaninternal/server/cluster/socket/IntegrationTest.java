@@ -11,22 +11,22 @@ import io.ebean.event.AbstractBeanPersistListener;
 import io.ebean.event.BeanPersistListener;
 import io.ebean.service.SpiContainer;
 import org.example.domain.Customer;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Properties;
 import java.util.Set;
 
-import static org.testng.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
-public class IntegrationTest {
+class IntegrationTest {
 
   private final BeanListener server0Listener;
   private final BeanListener server1Listener;
   private final SpiContainer container0;
   private final SpiContainer container1;
-  private Database server0;
-  private Database server1;
+  private final Database server0;
+  private final Database server1;
 
   private Customer customer;
 
@@ -70,9 +70,19 @@ public class IntegrationTest {
     return container;
   }
 
-
   @Test
-  public void insert() throws Exception {
+  void runAllTests() throws Exception {
+    insert();
+    update();
+    delete();
+    deleteById();
+    tableIUD();
+    bulkInsert();
+    bulkUpdate();
+    bulkDelete();
+  }
+
+  void insert() throws Exception {
 
     server1.getServerCacheManager().getBeanCache(Customer.class);
     server1.getServerCacheManager().getNaturalKeyCache(Customer.class);
@@ -87,8 +97,7 @@ public class IntegrationTest {
     assertSame(server0Listener.localInserted, customer);
   }
 
-  @Test(dependsOnMethods = "insert")
-  public void update() throws InterruptedException {
+  void update() throws InterruptedException {
 
     customer.setName("customerMod");
     server0.save(customer);
@@ -97,8 +106,7 @@ public class IntegrationTest {
     assertSame(server0Listener.localUpdated, customer);
   }
 
-  @Test(dependsOnMethods = "update")
-  public void delete() throws InterruptedException {
+  void delete() throws InterruptedException {
 
     server0.delete(customer);
     sleep();
@@ -106,8 +114,7 @@ public class IntegrationTest {
     assertSame(server0Listener.localDeleted, customer);
   }
 
-  @Test
-  public void deleteById() {
+  void deleteById() {
 
     Customer other = new Customer("shortLived");
     server0.save(other);
@@ -124,15 +131,12 @@ public class IntegrationTest {
     }
   }
 
-  @Test(dependsOnMethods = "deleteById")
-  public void tableIUD() throws InterruptedException {
-
+  void tableIUD() throws InterruptedException {
     server0.externalModification("customer", true, true, true);
     sleep();
   }
 
-  @Test(dependsOnMethods = "tableIUD")
-  public void bulkInsert() throws InterruptedException {
+  void bulkInsert() throws InterruptedException {
 
     SqlUpdate sqlInsert = server0.sqlUpdate("insert into customer (id, name, version) values(900, :name, 1)");
     sqlInsert.setParameter("name", "bulkTest");
@@ -141,17 +145,14 @@ public class IntegrationTest {
     sleep();
   }
 
-  @Test(dependsOnMethods = "bulkInsert")
-  public void bulkUpdate() throws InterruptedException {
-
+  void bulkUpdate() throws InterruptedException {
     SqlUpdate sqlUpdate = server0.sqlUpdate("update customer set notes = 'foo' where notes is null");
     sqlUpdate.execute();
 
     sleep();
   }
 
-  @Test(dependsOnMethods = "bulkUpdate")
-  public void bulkDelete() throws InterruptedException {
+  void bulkDelete() throws InterruptedException {
 
     SqlUpdate sqlDelete = server0.sqlUpdate("delete from customer where id > 100");
     sqlDelete.execute();
@@ -163,13 +164,13 @@ public class IntegrationTest {
     Thread.sleep(50);
   }
 
-  @AfterClass
-  public void shutdown() {
+  @AfterEach
+  void shutdown() {
     container0.shutdown();
     container1.shutdown();
   }
 
-  class BeanListener extends AbstractBeanPersistListener {
+  static class BeanListener extends AbstractBeanPersistListener {
 
     Object localInserted;
     Object localUpdated;
