@@ -1,6 +1,6 @@
 package io.ebeaninternal.server.cluster.socket;
 
-import io.ebeaninternal.server.lib.DaemonThreadFactory;
+import io.ebeaninternal.server.executor.DaemonThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

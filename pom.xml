@@ -10,7 +10,7 @@
 
   <groupId>io.ebean</groupId>
   <artifactId>ebean-simple-cluster</artifactId>
-  <version>12.6.2-SNAPSHOT</version>
+  <version>12.9.3-SNAPSHOT</version>
 
   <scm>
     <developerConnection>scm:git:git@github.com:ebean-orm/ebean-simple-cluster.git</developerConnection>
@@ -22,7 +22,7 @@
     <dependency>
       <groupId>io.ebean</groupId>
       <artifactId>ebean</artifactId>
-      <version>12.6.1</version>
+      <version>12.9.2</version>
       <scope>provided</scope>
     </dependency>
 
@@ -67,7 +67,7 @@
         <extensions>true</extensions>
         <configuration>
           <tiles>
-            <tile>io.ebean.tile:enhancement:12.6.0</tile>
+            <tile>io.ebean.tile:enhancement:12.9.2</tile>
           </tiles>
         </configuration>
       </plugin>
